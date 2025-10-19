@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { IBM_Plex_Mono } from "next/font/google";
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Micros",
@@ -17,10 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-mono antialiased`}>
-        {children}
-        <Analytics />
-      </body>
+      <body className={`${ibmPlexMono.className} antialiased`}>{children}</body>
     </html>
   );
 }
