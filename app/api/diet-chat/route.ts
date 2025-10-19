@@ -1,26 +1,12 @@
-import { streamText, type CoreMessage } from "ai";
+import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { saveMessages, type StoredMessage } from "@/lib/redis-messages";
+import { getSystemPrompt } from "@/lib/prompts";
+import { geolocation } from "@vercel/functions";
 
 export const maxDuration = 30;
-
-const systemPrompt = `You are a knowledgeable nutrition expert helping users create personalized diet plans based on their micronutrient needs.
-
-Your role is to:
-- Create balanced diet plans that meet daily vitamin and mineral requirements
-- Consider user preferences (vegetarian, vegan, gluten-free, etc.)
-- Suggest specific foods rich in needed micronutrients
-- Explain the benefits of different vitamins and minerals
-- Provide practical meal suggestions and recipes
-- Answer questions about nutrition and dietary choices
-
-Be conversational, supportive, and educational. Keep responses concise but informative.`;
-
-interface SimpleMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
@@ -28,8 +14,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { messages, userPreferences } = body as {
-      messages: SimpleMessage[];
-      userPreferences?: { dietType: string; age: string; gender: string };
+      messages: UIMessage[];
+      userPreferences: {
+        dietOptions: string[];
+        age: string;
+        gender: string;
+      };
     };
 
     console.log("[v0] Messages received:", messages?.length || 0);
@@ -37,6 +27,15 @@ export async function POST(req: Request) {
     // Get IP address for rate limiting
     const forwarded = req.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+
+    // Get geolocation hints
+    const geo = geolocation(req);
+    const requestHints = {
+      longitude: parseFloat(geo.longitude || "0"),
+      latitude: parseFloat(geo.latitude || "0"),
+      city: geo.city || "Unknown",
+      country: geo.country || "Unknown",
+    };
 
     // Check rate limit
     const rateLimitResult = await checkRateLimit(ip);
@@ -59,36 +58,66 @@ export async function POST(req: Request) {
       );
     }
 
-    const coreMessages: CoreMessage[] = messages.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
+    console.log("[v0] Calling streamText with", messages.length, "messages");
 
-    if (userPreferences && coreMessages.length === 1) {
-      const { dietType, age, gender } = userPreferences;
-      const contextPrefix = `[User Context: ${dietType} diet, ${age} years old, ${gender}]\n\n`;
-      coreMessages[0] = {
-        ...coreMessages[0],
-        content: contextPrefix + coreMessages[0].content,
-      };
-    }
-
-    console.log(
-      "[v0] Calling streamText with",
-      coreMessages.length,
-      "messages"
-    );
-
-    const result = streamText({
+    const result = await streamText({
       model: openai("gpt-4o-mini"),
-      system: systemPrompt,
-      messages: coreMessages,
+      system: getSystemPrompt({
+        dietOptions: userPreferences?.dietOptions || [],
+        age: userPreferences?.age || "",
+        gender: userPreferences?.gender || "",
+        requestHints: requestHints,
+      }),
+      messages: convertToModelMessages(messages),
       temperature: 0.7,
-      maxTokens: 1000,
-      abortSignal: req.signal,
     });
 
-    return result.toTextStreamResponse({
+    // Save messages after streaming completes (in the background)
+    result.text
+      .then(async (fullText) => {
+        try {
+          const allMessages: StoredMessage[] = messages
+            .filter((msg) => msg.role === "user" || msg.role === "assistant")
+            .map((msg) => {
+              const content = msg.parts
+                .map((part) => {
+                  if (part.type === "text") return part.text;
+                  // Handle tool-result parts safely
+                  if (part.type.startsWith("tool-")) {
+                    return JSON.stringify(part);
+                  }
+                  return "";
+                })
+                .join("");
+
+              return {
+                id: msg.id,
+                role: msg.role as "user" | "assistant",
+                content,
+                timestamp: Date.now(),
+              };
+            });
+
+          // Add the assistant's response
+          allMessages.push({
+            id: Date.now().toString(),
+            role: "assistant",
+            content: fullText,
+            timestamp: Date.now(),
+          });
+
+          await saveMessages(ip, allMessages);
+          console.log("[v0] Messages saved to Redis for", ip);
+        } catch (error) {
+          console.error("[v0] Error saving messages:", error);
+        }
+      })
+      .catch((error) => {
+        console.error("[v0] Error in text promise:", error);
+      });
+
+    // Return the UIMessage stream response as per the official guide
+    return result.toUIMessageStreamResponse({
       headers: {
         "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
         "X-RateLimit-Reset": rateLimitResult.resetAt.toISOString(),

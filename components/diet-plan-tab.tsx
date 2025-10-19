@@ -2,16 +2,13 @@
 
 import type React from "react";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
+import { Response } from "@/components/ai-elements/response";
 import type { DietPreferences } from "./preferences-modal";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
 
 interface DietPlanTabProps {
   preferences: DietPreferences | null;
@@ -22,241 +19,128 @@ export function DietPlanTab({
   preferences,
   onOpenPreferences,
 }: DietPlanTabProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [hasGeneratedInitial, setHasGeneratedInitial] = useState(false);
   const [rateLimitInfo, setRateLimitInfo] = useState<{
     remaining: number;
     resetAt?: string;
   } | null>(null);
-  const [hasGeneratedInitial, setHasGeneratedInitial] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState("");
 
+  // Use the AI SDK's useChat hook for automatic stream handling
+  const { messages, sendMessage, status, error, setMessages, stop } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/diet-chat",
+      body: preferences
+        ? {
+            userPreferences: {
+              dietOptions: preferences.dietOptions,
+              age: preferences.ageGroup,
+              gender: preferences.gender,
+            },
+          }
+        : undefined,
+    }),
+    onFinish: async ({ message, messages: allMessages }) => {
+      // Save messages to Redis after each interaction
+      try {
+        const messagesToSave = allMessages.map((msg) => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.parts
+            .map((part) => {
+              if ("text" in part) return part.text;
+              if ("toolResult" in part) return JSON.stringify(part.toolResult);
+              return "";
+            })
+            .join(""),
+          timestamp: Date.now(),
+        }));
+
+        // We'll save via a separate endpoint to avoid conflicts
+        await fetch("/api/diet-messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: messagesToSave }),
+        });
+      } catch (error) {
+        console.error("Error saving messages:", error);
+      }
+    },
+  });
+
+  // Load persisted messages on mount
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    const loadPersistedMessages = async () => {
+      try {
+        const response = await fetch("/api/diet-messages");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.messages && data.messages.length > 0) {
+            // Convert stored messages to UIMessage format
+            const uiMessages = data.messages.map((msg: any) => ({
+              id: msg.id,
+              role: msg.role,
+              parts: [{ type: "text", text: msg.content }],
+              status: "ready",
+            }));
+            setMessages(uiMessages);
+            setHasGeneratedInitial(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading persisted messages:", error);
+      }
+    };
+
+    loadPersistedMessages();
+  }, [setMessages]);
 
   // Generate initial diet plan when preferences are available
   useEffect(() => {
     if (preferences && !hasGeneratedInitial && messages.length === 0) {
       generateInitialPlan();
     }
-  }, [preferences, hasGeneratedInitial]);
+  }, [preferences, hasGeneratedInitial, messages.length]);
 
   const generateInitialPlan = async () => {
     if (!preferences) return;
 
-    setIsLoading(true);
-    setError(null);
+    setHasGeneratedInitial(true);
 
     const initialPrompt = `Create a personalized diet plan for me based on my preferences: Diet includes ${preferences.dietOptions.join(
       ", "
     )}, Age group: ${preferences.ageGroup}, Gender: ${
       preferences.gender
-    }. Please provide a comprehensive weekly meal plan with micronutrient considerations.`;
+    }. Please suggest 10-12 nutrient-dense foods with their serving sizes and micronutrient contributions.`;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: initialPrompt,
-    };
+    sendMessage({ text: initialPrompt });
+  };
 
-    setMessages([userMessage]);
-
+  const handleClearChat = async () => {
     try {
-      const response = await fetch("/api/diet-chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [userMessage],
-          userPreferences: {
-            dietType: preferences.dietOptions.join(", "),
-            age: preferences.ageGroup,
-            gender: preferences.gender,
-          },
-        }),
+      const response = await fetch("/api/diet-messages", {
+        method: "DELETE",
       });
 
-      const remaining = response.headers.get("X-RateLimit-Remaining");
-      const resetAt = response.headers.get("X-RateLimit-Reset");
-      if (remaining) {
-        setRateLimitInfo({
-          remaining: Number.parseInt(remaining),
-          resetAt: resetAt || undefined,
-        });
+      if (response.ok) {
+        setMessages([]);
+        setHasGeneratedInitial(false);
       }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate diet plan");
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantMessage = "";
-
-      if (reader) {
-        const assistantMessageId = (Date.now() + 1).toString();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("0:")) {
-              try {
-                const jsonStr = line.slice(2);
-                const parsed = JSON.parse(jsonStr);
-                if (parsed && typeof parsed === "string") {
-                  assistantMessage += parsed;
-                  setMessages((prev) => {
-                    const existing = prev.find(
-                      (m) => m.id === assistantMessageId
-                    );
-                    if (existing) {
-                      return prev.map((m) =>
-                        m.id === assistantMessageId
-                          ? { ...m, content: assistantMessage }
-                          : m
-                      );
-                    }
-                    return [
-                      ...prev,
-                      {
-                        id: assistantMessageId,
-                        role: "assistant" as const,
-                        content: assistantMessage,
-                      },
-                    ];
-                  });
-                }
-              } catch (e) {
-                // Ignore parse errors
-              }
-            }
-          }
-        }
-      }
-
-      setHasGeneratedInitial(true);
-    } catch (err) {
-      console.error("[v0] Diet plan generation error:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to generate diet plan"
-      );
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Error clearing chat:", error);
     }
   };
 
-  const handleChatSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || !preferences) return;
+    if (!input.trim() || status === "streaming") return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input.trim(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    sendMessage({ text: input });
     setInput("");
-    setIsLoading(true);
-    setError(null);
+  };
 
-    try {
-      const response = await fetch("/api/diet-chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          userPreferences: {
-            dietType: preferences.dietOptions.join(", "),
-            age: preferences.ageGroup,
-            gender: preferences.gender,
-          },
-        }),
-      });
-
-      const remaining = response.headers.get("X-RateLimit-Remaining");
-      const resetAt = response.headers.get("X-RateLimit-Reset");
-      if (remaining) {
-        setRateLimitInfo({
-          remaining: Number.parseInt(remaining),
-          resetAt: resetAt || undefined,
-        });
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get response");
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantMessage = "";
-
-      if (reader) {
-        const assistantMessageId = (Date.now() + 1).toString();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("0:")) {
-              try {
-                const jsonStr = line.slice(2);
-                const parsed = JSON.parse(jsonStr);
-                if (parsed && typeof parsed === "string") {
-                  assistantMessage += parsed;
-                  setMessages((prev) => {
-                    const existing = prev.find(
-                      (m) => m.id === assistantMessageId
-                    );
-                    if (existing) {
-                      return prev.map((m) =>
-                        m.id === assistantMessageId
-                          ? { ...m, content: assistantMessage }
-                          : m
-                      );
-                    }
-                    return [
-                      ...prev,
-                      {
-                        id: assistantMessageId,
-                        role: "assistant" as const,
-                        content: assistantMessage,
-                      },
-                    ];
-                  });
-                }
-              } catch (e) {
-                // Ignore parse errors
-              }
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error("[v0] Chat error:", err);
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
   };
 
   // Show preferences prompt if no preferences set
@@ -299,6 +183,8 @@ export function DietPlanTab({
     );
   }
 
+  const isLoading = status === "streaming" || status === "submitted";
+
   // Show chat interface with diet plan
   return (
     <div className="max-w-5xl mx-auto">
@@ -319,6 +205,28 @@ export function DietPlanTab({
               <div className="text-xs text-muted-foreground">
                 {rateLimitInfo.remaining} messages remaining today
               </div>
+            )}
+            {messages.length > 0 && (
+              <button
+                onClick={handleClearChat}
+                className="p-2 rounded-md hover:bg-muted transition-colors"
+                title="Clear chat history"
+              >
+                <svg
+                  className="w-5 h-5 text-foreground/60 hover:text-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
             )}
             <button
               onClick={onOpenPreferences}
@@ -350,7 +258,7 @@ export function DietPlanTab({
         </div>
 
         {/* Chat messages */}
-        <ScrollArea className="h-[60vh] px-6 py-4" ref={scrollRef}>
+        <ScrollArea className="h-[60vh] px-6 py-4">
           <div className="space-y-4">
             {messages.length === 0 && !isLoading && (
               <div className="text-center text-muted-foreground py-8">
@@ -368,15 +276,35 @@ export function DietPlanTab({
                 }`}
               >
                 <div
-                  className={`max-w-[85%] rounded-lg px-4 py-3 ${
+                  className={`rounded-lg px-4 py-3 ${
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground prose prose-sm max-w-none"
+                      ? "bg-primary text-primary-foreground max-w-[85%]"
+                      : "bg-muted text-foreground w-full"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {message.content}
-                  </p>
+                  {message.role === "user" ? (
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {message.parts
+                        .map((part) => {
+                          if (part.type === "text") return part.text;
+                          return "";
+                        })
+                        .join("")}
+                    </p>
+                  ) : (
+                    <div className="prose prose-sm max-w-none dark:prose-invert prose-table:text-sm prose-headings:text-foreground prose-th:text-left">
+                      <Response parseIncompleteMarkdown={true}>
+                        {message.parts
+                          .map((part) => {
+                            if (part.type === "text") return part.text;
+                            if (part.type.startsWith("tool-"))
+                              return JSON.stringify(part);
+                            return "";
+                          })
+                          .join("")}
+                      </Response>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -395,7 +323,9 @@ export function DietPlanTab({
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
                 <p className="text-sm text-destructive font-medium">Error</p>
-                <p className="text-xs text-destructive/80 mt-1">{error}</p>
+                <p className="text-xs text-destructive/80 mt-1">
+                  {error.message}
+                </p>
               </div>
             )}
           </div>
@@ -403,14 +333,15 @@ export function DietPlanTab({
 
         {/* Chat input */}
         <form
-          onSubmit={handleChatSubmit}
+          onSubmit={handleSubmit}
+          data-chat-form="true"
           className="p-4 border-t border-border bg-muted/30"
         >
           <div className="flex gap-2">
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Ask to modify your diet plan, get recipe ideas, or nutrition advice..."
               disabled={isLoading}
               className="flex-1 px-4 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"

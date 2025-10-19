@@ -1,26 +1,27 @@
-import { MicronutrientCard } from "./micronutrient-card"
+import { MicronutrientCard } from "./micronutrient-card";
 
 interface Nutrient {
-  name: string
-  category: string
-  unit: string
-  recommended_intake: Record<string, any>
-  found_in: string[]
-  deficiency_can_cause: string
-  deficiency_symptoms: string[]
-  absorption_tips: string
+  name: string;
+  category: string;
+  unit: string;
+  recommended_intake: Record<string, any>;
+  found_in: string[];
+  deficiency_can_cause: string;
+  deficiency_symptoms: string[];
+  absorption_tips: string;
 }
 
 interface CategorySectionProps {
-  title: string
-  description: string
-  nutrients: Nutrient[]
-  accentColor: "vitamins" | "minerals"
+  title: string;
+  description: string;
+  nutrients: Nutrient[];
 }
 
-export function CategorySection({ title, description, nutrients, accentColor }: CategorySectionProps) {
-
-
+export function CategorySection({
+  title,
+  description,
+  nutrients,
+}: CategorySectionProps) {
   return (
     <section className={"mb-16"}>
       {/* Section Header */}
@@ -46,5 +47,5 @@ export function CategorySection({ title, description, nutrients, accentColor }: 
         ))}
       </div>
     </section>
-  )
+  );
 }

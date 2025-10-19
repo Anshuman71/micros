@@ -15,7 +15,7 @@ interface Nutrient {
   absorption_tips: string;
 }
 
-function VitaminsPage() {
+function MineralsPage() {
   const [nutrients, setNutrients] = useState<Nutrient[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,11 +35,7 @@ function VitaminsPage() {
     fetchData();
   }, []);
 
-  const vitamins = nutrients.filter(
-    (n) =>
-      n.category === "vitamin" ||
-      n.category === "vitamin-like / essential nutrient"
-  );
+  const minerals = nutrients.filter((n) => n.category === "mineral");
 
   if (loading) {
     return (
@@ -62,17 +58,17 @@ function VitaminsPage() {
 
   return (
     <CategorySection
-      title="Vitamins"
-      description="Organic compounds essential for various bodily functions including immunity, energy production, and cellular repair."
-      nutrients={vitamins}
+      title="Minerals"
+      description="Inorganic elements crucial for bone health, muscle function, nerve transmission, and maintaining proper fluid balance."
+      nutrients={minerals}
     />
   );
 }
 
-export default function Home() {
+export default function Minerals() {
   return (
     <AppShell>
-      <VitaminsPage />
+      <MineralsPage />
     </AppShell>
   );
 }
