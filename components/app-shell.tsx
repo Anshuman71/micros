@@ -7,6 +7,7 @@ import {
   PreferencesModal,
   type DietPreferences,
 } from "@/components/preferences-modal";
+import { useLocalStorage } from "usehooks-ts";
 
 interface PreferencesContextType {
   preferences: DietPreferences | null;
@@ -32,7 +33,8 @@ export function AppShell({ children }: AppShellProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [dietPreferences, setDietPreferences] =
-    useState<DietPreferences | null>(null);
+    useLocalStorage<DietPreferences | null>("dietPreferences", null);
+  const [dietChatId] = useLocalStorage<string | null>("dietChatId", null);
 
   // Determine active tab from pathname
   const getActiveTab = () => {
@@ -43,16 +45,7 @@ export function AppShell({ children }: AppShellProps) {
 
   const activeTab = getActiveTab();
 
-  useEffect(() => {
-    const savedPreferences = localStorage.getItem("dietPreferences");
-    if (savedPreferences) {
-      try {
-        setDietPreferences(JSON.parse(savedPreferences));
-      } catch (error) {
-        console.error("Error loading preferences:", error);
-      }
-    }
-  }, []);
+  // useLocalStorage initializes from localStorage automatically; no manual load needed
 
   // Handle scroll to minimize header with hysteresis to prevent flapping
   useEffect(() => {
@@ -79,7 +72,6 @@ export function AppShell({ children }: AppShellProps) {
 
   const handleSavePreferences = (preferences: DietPreferences) => {
     setDietPreferences(preferences);
-    localStorage.setItem("dietPreferences", JSON.stringify(preferences));
   };
 
   const accentMap = {
@@ -87,6 +79,8 @@ export function AppShell({ children }: AppShellProps) {
     minerals: "var(--accent-minerals)",
     "diet-plan": "var(--accent-diet-plan)",
   };
+
+  const dietPlanHref = dietChatId ? `/diet-plan/${dietChatId}` : "/diet-plan";
 
   const preferencesValue = {
     preferences: dietPreferences,
@@ -138,7 +132,7 @@ export function AppShell({ children }: AppShellProps) {
               tabs={[
                 { id: "vitamins", label: "Vitamins", href: "/" },
                 { id: "minerals", label: "Minerals", href: "/minerals" },
-                { id: "diet-plan", label: "Diet Plan", href: "/diet-plan" },
+                { id: "diet-plan", label: "Diet Plan", href: dietPlanHref },
               ]}
               activeTab={activeTab}
             />
