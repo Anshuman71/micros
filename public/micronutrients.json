@@ -1,0 +1,467 @@
+[
+  {
+    "name": "Vitamin A (Retinol Activity Equivalents)",
+    "category": "vitamin",
+    "unit": "µg RAE/day",
+    "recommended_intake": {
+      "children_4_8": 400,
+      "children_9_13": 600,
+      "adult_19_50": {"male": 900, "female": 700},
+      "adult_51_plus": {"male": 900, "female": 700}
+    },
+    "found_in": ["Liver", "carrots", "sweet potato", "spinach", "fortified dairy", "mango"],
+    "deficiency_can_cause": "Impaired vision (especially night vision), poor immune function, xerosis",
+    "deficiency_symptoms": ["Night blindness", "Dry eyes", "Increased infections", "Dry/rough skin"],
+    "absorption_tips": "Fat-soluble — consume with dietary fat (oils, ghee, nuts). Avoid excessive alcohol which impairs liver storage."
+  },
+  {
+    "name": "Vitamin C (Ascorbic acid)",
+    "category": "vitamin",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 25,
+      "children_9_13": 45,
+      "adult_19_50": {"male": 90, "female": 75},
+      "adult_51_plus": {"male": 90, "female": 75}
+    },
+    "found_in": ["Citrus fruits", "guava", "amla", "bell peppers", "strawberries"],
+    "deficiency_can_cause": "Scurvy (impaired collagen synthesis), poor wound healing",
+    "deficiency_symptoms": ["Bleeding gums", "Loose teeth", "Poor wound healing", "Fatigue", "Easy bruising"],
+    "absorption_tips": "Water-soluble — best taken with food. Enhances non-heme iron absorption — pair with iron sources. Avoid taking with milk if using high dose supplements (may slightly reduce absorption)."
+  },
+  {
+    "name": "Vitamin D (Cholecalciferol / Ergocalciferol)",
+    "category": "vitamin",
+    "unit": "IU/day",
+    "recommended_intake": {
+      "children_4_8": 600,
+      "children_9_13": 600,
+      "adult_19_50": {"male": 600, "female": 600},
+      "adult_51_plus": {"male": "600 (51–70 yrs); 800 (71+ yrs)", "female": "600 (51–70 yrs); 800 (71+ yrs)"}
+    },
+    "found_in": ["Sunlight (skin synthesis)", "fortified milk", "fatty fish", "mushrooms exposed to UV"],
+    "deficiency_can_cause": "Rickets in children, osteomalacia/low bone density in adults",
+    "deficiency_symptoms": ["Bone pain", "Muscle weakness", "Increased fracture risk", "Delayed growth in kids"],
+    "absorption_tips": "Fat-soluble — take with meals containing fat. Sunlight exposure (short daily exposure) helps synthesis. Older adults may need supplements due to lower skin synthesis."
+  },
+  {
+    "name": "Vitamin E (Tocopherol)",
+    "category": "vitamin",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 7,
+      "children_9_13": 11,
+      "adult_19_50": {"male": 15, "female": 15},
+      "adult_51_plus": {"male": 15, "female": 15}
+    },
+    "found_in": ["Almonds", "sunflower seeds", "vegetable oils", "spinach"],
+    "deficiency_can_cause": "Rare in healthy people; may cause neuromuscular degeneration in severe deficiency",
+    "deficiency_symptoms": ["Muscle weakness", "Peripheral neuropathy", "Impaired coordination"],
+    "absorption_tips": "Fat-soluble — take with a fat-containing meal. High supplemental doses can interfere with vitamin K and clotting."
+  },
+  {
+    "name": "Vitamin K (phylloquinone & menaquinones)",
+    "category": "vitamin",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 55,
+      "children_9_13": 60,
+      "adult_19_50": {"male": 120, "female": 90},
+      "adult_51_plus": {"male": 120, "female": 90}
+    },
+    "found_in": ["Leafy greens (spinach, kale)", "broccoli", "natto", "fermented foods"],
+    "deficiency_can_cause": "Bleeding disorders due to impaired clotting",
+    "deficiency_symptoms": ["Easy bruising", "Prolonged bleeding", "Nosebleeds"],
+    "absorption_tips": "Fat-soluble — take with dietary fat. If on anticoagulant therapy (warfarin), maintain consistent vitamin K intake and consult physician before changes."
+  },
+  {
+    "name": "Thiamin (Vitamin B1)",
+    "category": "vitamin",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 0.6,
+      "children_9_13": 0.9,
+      "adult_19_50": {"male": 1.2, "female": 1.1},
+      "adult_51_plus": {"male": 1.2, "female": 1.1}
+    },
+    "found_in": ["Whole grains", "legumes", "pork", "nuts", "seeds"],
+    "deficiency_can_cause": "Beriberi; Wernicke encephalopathy in severe deficiency (esp. with alcoholism)",
+    "deficiency_symptoms": ["Fatigue", "Irritability", "Peripheral neuropathy", "Muscle weakness", "Cardiac symptoms in wet beriberi"],
+    "absorption_tips": "Water-soluble — stable with heat moderately but avoid long cooking. Excessive alcohol and high intake of raw fish/anti-thiamine factors can impair absorption."
+  },
+  {
+    "name": "Riboflavin (Vitamin B2)",
+    "category": "vitamin",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 0.6,
+      "children_9_13": 0.9,
+      "adult_19_50": {"male": 1.3, "female": 1.1},
+      "adult_51_plus": {"male": 1.3, "female": 1.1}
+    },
+    "found_in": ["Milk", "eggs", "almonds", "leafy greens", "lean meat"],
+    "deficiency_can_cause": "Ariboflavinosis — affects skin and mucous membranes",
+    "deficiency_symptoms": ["Cracked lips (cheilosis)", "Sore throat", "Red inflamed tongue", "Dermatitis"],
+    "absorption_tips": "Water-soluble — light sensitive (store foods away from direct light). Take with meals."
+  },
+  {
+    "name": "Niacin (Vitamin B3, as niacin or niacinamide)",
+    "category": "vitamin",
+    "unit": "mg/day (NE or niacin equivalents)",
+    "recommended_intake": {
+      "children_4_8": 8,
+      "children_9_13": 12,
+      "adult_19_50": {"male": 16, "female": 14},
+      "adult_51_plus": {"male": 16, "female": 14}
+    },
+    "found_in": ["Peanuts", "meat", "fish", "whole grains", "mushrooms"],
+    "deficiency_can_cause": "Pellagra (dermatitis, diarrhea, dementia)",
+    "deficiency_symptoms": ["Dermatitis (photosensitive)", "Diarrhea", "Cognitive changes", "Fatigue"],
+    "absorption_tips": "Water-soluble — usually adequate in mixed diets. High supplemental niacin can cause flushing — take with food to reduce discomfort."
+  },
+  {
+    "name": "Vitamin B6 (Pyridoxine)",
+    "category": "vitamin",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 0.6,
+      "children_9_13": 1.0,
+      "adult_19_50": {"male": 1.3, "female": 1.3},
+      "adult_51_plus": {"male": 1.7, "female": 1.5}
+    },
+    "found_in": ["Bananas", "potatoes", "chickpeas", "fish", "poultry"],
+    "deficiency_can_cause": "Microcytic anemia, neurological symptoms",
+    "deficiency_symptoms": ["Irritability", "Depression", "Peripheral neuropathy (in severe cases)", "Anemia"],
+    "absorption_tips": "Water-soluble — best taken with meals. Large supplemental doses may cause neuropathy; follow recommended limits."
+  },
+  {
+    "name": "Folate (Vitamin B9, food folate / folic acid)",
+    "category": "vitamin",
+    "unit": "µg DFE/day",
+    "recommended_intake": {
+      "children_4_8": 200,
+      "children_9_13": 300,
+      "adult_19_50": {"male": 400, "female": 400},
+      "adult_51_plus": {"male": 400, "female": 400}
+    },
+    "found_in": ["Leafy greens", "legumes", "fortified cereals", "orange juice", "beets"],
+    "deficiency_can_cause": "Megaloblastic anemia; in pregnant women — neural tube defects risk for fetus",
+    "deficiency_symptoms": ["Fatigue", "Pale skin", "Glossitis", "Shortness of breath", "Poor growth in children"],
+    "absorption_tips": "Folate from food is well absorbed; folic acid (supplement/fortified) is more bioavailable. Take with B12; alcohol impairs absorption."
+  },
+  {
+    "name": "Vitamin B12 (Cobalamin)",
+    "category": "vitamin",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 1.2,
+      "children_9_13": 1.8,
+      "adult_19_50": {"male": 2.4, "female": 2.4},
+      "adult_51_plus": {"male": 2.4, "female": 2.4}
+    },
+    "found_in": ["Animal products (meat, fish, dairy, eggs)", "fortified cereals"],
+    "deficiency_can_cause": "Megaloblastic anemia, irreversible neurological damage if prolonged",
+    "deficiency_symptoms": ["Paresthesias (tingling)", "Weakness", "Memory problems", "Megaloblastic anemia"],
+    "absorption_tips": "Absorption requires intrinsic factor and gastric acid — older adults and people with gastric surgery may need B12 injections or high-dose oral/sublingual supplements. Take after meals."
+  },
+  {
+    "name": "Pantothenic acid (Vitamin B5)",
+    "category": "vitamin",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 3,
+      "children_9_13": 4,
+      "adult_19_50": {"male": 5, "female": 5},
+      "adult_51_plus": {"male": 5, "female": 5}
+    },
+    "found_in": ["Avocado", "mushrooms", "eggs", "whole grains"],
+    "deficiency_can_cause": "Rare in normal diets; generalized deficiency affects multiple systems",
+    "deficiency_symptoms": ["Fatigue", "Headache", "Numbness", "GI distress"],
+    "absorption_tips": "Widespread in foods — deficiency rare. Take with meals if supplementing."
+  },
+  {
+    "name": "Biotin (Vitamin B7)",
+    "category": "vitamin",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 12,
+      "children_9_13": 20,
+      "adult_19_50": {"male": 30, "female": 30},
+      "adult_51_plus": {"male": 30, "female": 30}
+    },
+    "found_in": ["Egg yolk", "nuts", "soy", "whole grains"],
+    "deficiency_can_cause": "Rare; can result from long-term raw egg white consumption (avidin binds biotin)",
+    "deficiency_symptoms": ["Hair thinning", "Dermatitis", "Conjunctivitis", "Neurological symptoms"],
+    "absorption_tips": "Avoid consuming large amounts of raw egg whites. Biotin is broadly available in foods."
+  },
+  {
+    "name": "Choline",
+    "category": "vitamin-like / essential nutrient",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 250,
+      "children_9_13": 375,
+      "adult_19_50": {"male": 550, "female": 425},
+      "adult_51_plus": {"male": 550, "female": 425}
+    },
+    "found_in": ["Eggs", "liver", "soybeans", "peanuts"],
+    "deficiency_can_cause": "Liver dysfunction, muscle damage (rare in humans on normal diets)",
+    "deficiency_symptoms": ["Fatty liver", "Muscle damage markers (biopsy)"],
+    "absorption_tips": "Found in many foods; supplementation may be recommended in pregnancy. Take with meals."
+  },
+  {
+    "name": "Calcium",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 1000,
+      "children_9_13": 1300,
+      "adult_19_50": {"male": 1000, "female": 1000},
+      "adult_51_plus": {"male": 1000, "female": 1200}
+    },
+    "found_in": ["Milk and dairy", "tofu (calcium-set)", "ragi", "sesame seeds", "leafy greens"],
+    "deficiency_can_cause": "Osteopenia/osteoporosis, rickets in children",
+    "deficiency_symptoms": ["Bone pain", "Increased fracture risk", "Muscle cramps/tetany in acute severe hypocalcemia"],
+    "absorption_tips": "Absorption enhanced by vitamin D. Take calcium supplements in divided doses (≤500 mg per dose). Avoid taking with iron or high-zinc doses at same time."
+  },
+  {
+    "name": "Phosphorus",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 500,
+      "children_9_13": 1250,
+      "adult_19_50": {"male": 700, "female": 700},
+      "adult_51_plus": {"male": 700, "female": 700}
+    },
+    "found_in": ["Dairy", "meat", "fish", "poultry", "nuts", "legumes"],
+    "deficiency_can_cause": "Rare with normal diets; may cause bone pain and weakness",
+    "deficiency_symptoms": ["Weakness", "Bone pain", "Appetite loss"],
+    "absorption_tips": "Generally adequate in varied diets. Excessive soda/phosphate additives can alter Ca:P balance."
+  },
+  {
+    "name": "Magnesium",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 130,
+      "children_9_13": 240,
+      "adult_19_50": {"male": 400, "female": 310},
+      "adult_51_plus": {"male": 420, "female": 320}
+    },
+    "found_in": ["Spinach", "almonds", "cashews", "whole grains", "legumes"],
+    "deficiency_can_cause": "Muscle cramps, arrhythmias, neuromuscular irritability",
+    "deficiency_symptoms": ["Muscle cramps", "Tremor", "Fatigue", "Arrhythmias (in severe deficiency)"],
+    "absorption_tips": "Magnesium absorption can be reduced by high doses of calcium and by phytates; take magnesium at a different time than high-dose calcium/iron. Taking at night may aid sleep/relaxation for some."
+  },
+  {
+    "name": "Iron",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 10,
+      "children_9_13": 8,
+      "adult_19_50": {"male": 8, "female": 18},
+      "adult_51_plus": {"male": 8, "female": 8}
+    },
+    "found_in": ["Red meat", "lentils", "spinach", "fortified cereals", "jaggery"],
+    "deficiency_can_cause": "Iron deficiency anemia (microcytic anemia) with impaired oxygen transport",
+    "deficiency_symptoms": ["Pale skin", "Fatigue", "Shortness of breath", "Pica (cravings for nonfood items)", "Restless legs"],
+    "absorption_tips": "Non-heme iron absorption improved by vitamin C; inhibiters include tea/coffee (tannins), calcium, and phytates — avoid consuming these with iron supplements/iron-rich meals. Women of reproductive age need higher intake due to menstrual losses."
+  },
+  {
+    "name": "Zinc",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 5,
+      "children_9_13": 8,
+      "adult_19_50": {"male": 11, "female": 8},
+      "adult_51_plus": {"male": 11, "female": 8}
+    },
+    "found_in": ["Pumpkin seeds", "legumes", "meat", "dairy", "nuts"],
+    "deficiency_can_cause": "Impaired growth, delayed wound healing, impaired immune function",
+    "deficiency_symptoms": ["Hair loss", "Poor wound healing", "Frequent infections", "Loss of appetite"],
+    "absorption_tips": "Phytates in whole grains/legumes reduce absorption — soaking/fermentation reduces phytates. High zinc supplements can interfere with copper — avoid long-term high-dose zinc without monitoring."
+  },
+  {
+    "name": "Copper",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 0.44,
+      "children_9_13": 0.7,
+      "adult_19_50": {"male": 0.9, "female": 0.9},
+      "adult_51_plus": {"male": 0.9, "female": 0.9}
+    },
+    "found_in": ["Nuts", "seeds", "mushrooms", "whole grains", "shellfish"],
+    "deficiency_can_cause": "Rare; affects iron metabolism and connective tissue",
+    "deficiency_symptoms": ["Anemia (refractory to iron alone)", "Low WBC count", "Bone abnormalities in severe cases"],
+    "absorption_tips": "Copper and zinc compete — avoid supplementing large amounts of one without the other. Take with food to reduce GI irritation."
+  },
+  {
+    "name": "Manganese",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 1.2,
+      "children_9_13": 1.5,
+      "adult_19_50": {"male": 2.3, "female": 1.8},
+      "adult_51_plus": {"male": 2.3, "female": 1.8}
+    },
+    "found_in": ["Whole grains", "nuts", "leafy vegetables", "tea"],
+    "deficiency_can_cause": "Rare; may impair growth and bone formation in animals and humans in severe deficiency",
+    "deficiency_symptoms": ["Impaired growth", "Bone abnormalities (rare)"],
+    "absorption_tips": "Typically adequate in varied diets; high dietary calcium/phytates may reduce absorption."
+  },
+  {
+    "name": "Selenium",
+    "category": "mineral",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 30,
+      "children_9_13": 40,
+      "adult_19_50": {"male": 55, "female": 55},
+      "adult_51_plus": {"male": 55, "female": 55}
+    },
+    "found_in": ["Brazil nuts", "sunflower seeds", "seafood", "whole grains"],
+    "deficiency_can_cause": "Keshan disease (cardiomyopathy) in severe deficiency; impaired antioxidant defenses",
+    "deficiency_symptoms": ["Muscle weakness", "Fatigue", "Immune dysfunction (in severe cases)"],
+    "absorption_tips": "One Brazil nut (small) per day can provide adequate selenium for many adults — avoid excessive intake (toxicity risk)."
+  },
+  {
+    "name": "Iodine",
+    "category": "mineral",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 90,
+      "children_9_13": 120,
+      "adult_19_50": {"male": 150, "female": 150},
+      "adult_51_plus": {"male": 150, "female": 150}
+    },
+    "found_in": ["Iodized salt", "seaweed", "dairy", "fish"],
+    "deficiency_can_cause": "Goiter and hypothyroidism; impaired neurodevelopment in fetal/childhood deficiency",
+    "deficiency_symptoms": ["Enlarged thyroid (goiter)", "Fatigue", "Cold intolerance", "Weight gain"],
+    "absorption_tips": "Use iodized salt (add after cooking to preserve iodine). Large amounts of raw goitrogenic foods (cassava, raw crucifers) can interfere with iodine utilization if intake is low."
+  },
+  {
+    "name": "Chromium",
+    "category": "mineral",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 15,
+      "children_9_13": 25,
+      "adult_19_50": {"male": 35, "female": 25},
+      "adult_51_plus": {"male": 30, "female": 20}
+    },
+    "found_in": ["Whole grains", "broccoli", "meat", "nuts"],
+    "deficiency_can_cause": "Rare in free-living populations; impaired glucose tolerance has been associated with deficiency",
+    "deficiency_symptoms": ["Impaired glucose control", "Weight loss (in experimental deficiency)"],
+    "absorption_tips": "Keep intake from whole foods; avoid excessive refined sugar diets which may increase chromium needs."
+  },
+  {
+    "name": "Molybdenum",
+    "category": "mineral",
+    "unit": "µg/day",
+    "recommended_intake": {
+      "children_4_8": 17,
+      "children_9_13": 22,
+      "adult_19_50": {"male": 45, "female": 45},
+      "adult_51_plus": {"male": 45, "female": 45}
+    },
+    "found_in": ["Legumes", "whole grains", "nuts"],
+    "deficiency_can_cause": "Very rare; involved in enzyme systems",
+    "deficiency_symptoms": ["Tachycardia, headache, mental confusion (extremely rare)"],
+    "absorption_tips": "Dietary intake normally adequate; avoid extremely high supplemental intakes."
+  },
+  {
+    "name": "Fluoride",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 1.0,
+      "children_9_13": 2.0,
+      "adult_19_50": {"male": 3.0, "female": 3.0},
+      "adult_51_plus": {"male": 3.0, "female": 3.0}
+    },
+    "found_in": ["Fluoridated water", "tea", "seafood"],
+    "deficiency_can_cause": "Increased dental caries risk",
+    "deficiency_symptoms": ["Increased cavities", "Weaker tooth enamel"],
+    "absorption_tips": "Most needs met through fluoridated water and topical fluoride (toothpaste). Avoid swallowing high-fluoride toothpaste in children."
+  },
+  {
+    "name": "Sodium (as Na)",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 1200,
+      "children_9_13": 1500,
+      "adult_19_50": {"male": 1500, "female": 1500},
+      "adult_51_plus": {"male": 1500, "female": 1500}
+    },
+    "found_in": ["Table salt", "processed foods", "pickles", "soups"],
+    "deficiency_can_cause": "Hyponatremia (usually due to excess water intake or disease), low blood pressure in extreme low sodium states",
+    "deficiency_symptoms": ["Nausea", "Headache", "Confusion", "Seizures (severe hyponatremia)"],
+    "absorption_tips": "Most people consume more than needed — limit processed food and added salt to manage blood pressure. Spread intake; maintain hydration."
+  },
+  {
+    "name": "Potassium",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 3800,
+      "children_9_13": 4500,
+      "adult_19_50": {"male": 3400, "female": 2600},
+      "adult_51_plus": {"male": 3400, "female": 2600}
+    },
+    "found_in": ["Bananas", "potatoes", "coconut water", "beans", "leafy greens"],
+    "deficiency_can_cause": "Hypokalemia — can affect muscle and cardiac function",
+    "deficiency_symptoms": ["Muscle weakness", "Cramps", "Constipation", "Arrhythmias (severe)"],
+    "absorption_tips": "Best from whole foods. If on ACE inhibitors, ARBs, or potassium-sparing diuretics, monitor potassium to avoid hyperkalemia."
+  },
+  {
+    "name": "Chloride",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 1900,
+      "children_9_13": 2300,
+      "adult_19_50": {"male": 2300, "female": 2300},
+      "adult_51_plus": {"male": 2300, "female": 2300}
+    },
+    "found_in": ["Table salt (NaCl)", "tomatoes", "seaweed", "processed foods"],
+    "deficiency_can_cause": "Rare; often related to excessive vomiting or diarrhea",
+    "deficiency_symptoms": ["Dehydration", "Weakness", "Electrolyte imbalance"],
+    "absorption_tips": "Typically met with normal salt intake; avoid excess processed foods high in sodium/chloride."
+  },
+  {
+    "name": "Iron (Fe)",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 10,
+      "children_9_13": 8,
+      "adult_19_50": {"male": 8, "female": 18},
+      "adult_51_plus": {"male": 8, "female": 8}
+    },
+    "found_in": ["Red meat", "lentils", "spinach", "fortified cereals", "jaggery"],
+    "deficiency_can_cause": "Iron deficiency anemia (microcytic anemia) with impaired oxygen delivery",
+    "deficiency_symptoms": ["Fatigue", "Pallor", "Shortness of breath", "Pica", "Cold intolerance"],
+    "absorption_tips": "Non-heme iron absorption improved by vitamin C and inhibited by tea/coffee, calcium, and phytates — take iron supplements on empty stomach with vitamin C if tolerated; avoid tea/coffee 1 hour before/after iron."
+  },
+  {
+    "name": "Zinc (Zn)",
+    "category": "mineral",
+    "unit": "mg/day",
+    "recommended_intake": {
+      "children_4_8": 5,
+      "children_9_13": 8,
+      "adult_19_50": {"male": 11, "female": 8},
+      "adult_51_plus": {"male": 11, "female": 8}
+    },
+    "found_in": ["Meat", "shellfish", "pumpkin seeds", "legumes", "dairy"],
+    "deficiency_can_cause": "Impaired growth, immune dysfunction, delayed wound healing",
+    "deficiency_symptoms": ["Frequent infections", "Hair loss", "Loss of appetite", "Delayed wound healing"],
+    "absorption_tips": "Phytate-rich diets reduce absorption; soaking/fermenting legumes/grains helps. Avoid high-dose zinc long-term (can cause copper deficiency)."
+  }
+]
