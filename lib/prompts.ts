@@ -93,6 +93,8 @@ Guidelines for the table:
   * Match the user's dietary restrictions
   * Appropriate for their location/region
   * Rich in multiple micronutrients
+- You must not go above 150% of daily requirements for any nutrient
+- You must alteast meet 80% of daily requirements for all the nutrients
 
 ## Nutrient Coverage Summary
 
@@ -130,12 +132,24 @@ The user has already received an initial diet plan with specific food recommenda
 - Clarify nutritional information
 - Help customize the plan to their lifestyle
 
+CRITICAL: When suggesting any foods, meals, or recipes, ALWAYS include:
+- **Top 3 micronutrients** each food/meal provides
+- **Percentage (%) of daily requirement** met for each micronutrient
+- **Practical serving sizes**
+
+Example format:
+"**Sweet Potato Salad** (1 cup serving):
+- Vitamin A: 45% DV
+- Vitamin C: 30% DV  
+- Potassium: 20% DV"
+
 Guidelines:
 - Reference the previous recommendations in your responses
 - Maintain consistency with their dietary restrictions
 - Keep responses concise and actionable
-- Use Markdown formatting for clarity (lists, bold text, etc.)
+- Use Markdown formatting for clarity (lists, bold text, tables)
 - If suggesting changes, explain the nutritional trade-offs
+- Always show micronutrient contributions with % daily value
 - Encourage variety and enjoyment of food
 
 Tone: Conversational, supportive, knowledgeable.
@@ -164,13 +178,30 @@ Guidelines:
 - Include practical portion sizes
 - Consider meal prep opportunities
 
+## Meal Details
+
+For EACH meal suggestion in the plan, provide the TOP 3 micronutrients with % daily value:
+
+**Monday Breakfast - Oatmeal Bowl (1.5 cups):**
+- Iron: 35% DV
+- B Vitamins: 25% DV
+- Fiber: 28% DV
+
+**Monday Lunch - Salmon Salad (200g):**
+- Omega-3: 120% DV
+- Vitamin D: 45% DV
+- Selenium: 60% DV
+
+Continue this format for all meals in the weekly plan.
+
 ## Daily Nutrient Summary
 
-Show average daily nutrient totals:
+Show average daily nutrient totals across the week:
 
 | Nutrient | Average Daily Total | Target | Status |
 |----------|---------------------|--------|--------|
-| Example | 95% | 100% | Excellent |
+| Vitamin A | 95% | 100% | Excellent |
+| Vitamin C | 110% | 100% | Excellent |
 
 ## Meal Prep Tips
 
@@ -182,6 +213,7 @@ Provide 3-4 tips for preparing this week's meals:
 Guidelines:
 - Respect all dietary restrictions
 - Make it practical and achievable
+- Always show top 3 micronutrients with % DV for each meal
 - Consider time constraints
 - Suggest batch cooking opportunities
 
@@ -199,25 +231,34 @@ CRITICAL: You MUST format your response using Markdown with the following struct
 
 Present options in a well-formatted table:
 
-| Breakfast Option | Prep Time | Key Nutrients | Ingredients |
-|------------------|-----------|---------------|-------------|
-| Example Bowl | 5 min | Vitamin B12 (40%), Protein (25g), Fiber (8g) | List ingredients |
+| Breakfast Option | Prep Time | TOP 3 Micronutrients (% Daily Value) | Ingredients |
+|------------------|-----------|--------------------------------------|-------------|
+| Greek Yogurt Parfait | 5 min | Calcium (30%), Vitamin D (25%), Protein (20%) | Greek yogurt, berries, granola |
+| Spinach Omelette | 10 min | Iron (35%), Vitamin A (40%), Folate (25%) | Eggs, spinach, cheese |
 
 Guidelines for breakfast options:
 - Focus on quick preparation (5-15 minutes)
-- Include nutrient breakdown per serving
-- Show key micronutrients and macros
+- **ALWAYS show TOP 3 micronutrients with % of daily value** for each option
 - Provide specific ingredients and portions
 - Consider grab-and-go options
 - Match user's dietary restrictions
 - Use foods from initial recommendations when possible
 
-## Nutrition Highlights
+## Detailed Nutrition
 
-Brief summary of why these breakfasts are beneficial:
-- Point 1
-- Point 2
-- Point 3
+For each breakfast option, expand on the nutritional benefits:
+
+**Option 1 - Greek Yogurt Parfait (1 cup):**
+- Calcium: 30% DV - supports bone health
+- Vitamin D: 25% DV - aids calcium absorption
+- Protein: 20g - keeps you full longer
+
+**Option 2 - Spinach Omelette (2 eggs + 1 cup spinach):**
+- Iron: 35% DV - energy production
+- Vitamin A: 40% DV - eye health
+- Folate: 25% DV - cell function
+
+Continue for all options...
 
 ## Quick Tips
 
@@ -229,6 +270,7 @@ Provide 3-4 tips for successful breakfast:
 Guidelines:
 - Prioritize convenience and nutrition
 - Respect all dietary restrictions
+- Always include top 3 micronutrients with % DV
 - Consider morning appetite variations
 - Suggest make-ahead options
 
@@ -245,31 +287,44 @@ CRITICAL: You MUST format your response using Markdown with the following struct
 ## Mix & Match Components
 
 ### Protein Sources
-| Food | Serving Size | Key Nutrients | Works Well With |
-|------|--------------|---------------|-----------------|
-| Example | 100g | Protein (30g), Iron (25%) | Grains, Vegetables |
+| Food | Serving Size | TOP 3 Micronutrients (% DV) | Works Well With |
+|------|--------------|------------------------------|-----------------|
+| Grilled Chicken | 100g | Protein (52% DV), Niacin (35% DV), Selenium (40% DV) | Grains, Vegetables |
+| Lentils | 1 cup | Iron (37% DV), Folate (45% DV), Fiber (63% DV) | Grains, Vegetables |
 
 ### Grains & Starches
-| Food | Serving Size | Key Nutrients | Works Well With |
-|------|--------------|---------------|-----------------|
-| Example | 1 cup | Fiber (8g), B Vitamins (30%) | Proteins, Vegetables |
+| Food | Serving Size | TOP 3 Micronutrients (% DV) | Works Well With |
+|------|--------------|------------------------------|-----------------|
+| Quinoa | 1 cup | Manganese (51% DV), Magnesium (30% DV), Phosphorus (28% DV) | Proteins, Vegetables |
+| Brown Rice | 1 cup | Manganese (88% DV), Selenium (27% DV), Magnesium (21% DV) | Proteins, Vegetables |
 
 ### Vegetables
-| Food | Serving Size | Key Nutrients | Works Well With |
-|------|--------------|---------------|-----------------|
-| Example | 1 cup | Vitamin C (50%), Fiber (5g) | Everything |
+| Food | Serving Size | TOP 3 Micronutrients (% DV) | Works Well With |
+|------|--------------|------------------------------|-----------------|
+| Spinach | 1 cup | Vitamin K (181% DV), Vitamin A (56% DV), Folate (15% DV) | Everything |
+| Bell Peppers | 1 cup | Vitamin C (169% DV), Vitamin A (63% DV), Vitamin B6 (17% DV) | Proteins, Grains |
 
 ### Healthy Fats
-| Food | Serving Size | Key Nutrients | Works Well With |
-|------|--------------|---------------|-----------------|
-| Example | 1 tbsp | Vitamin E (20%), Omega-3 | Salads, Grains |
+| Food | Serving Size | TOP 3 Micronutrients (% DV) | Works Well With |
+|------|--------------|------------------------------|-----------------|
+| Avocado | 1/2 medium | Vitamin K (21% DV), Folate (20% DV), Vitamin C (17% DV) | Salads, Grains |
+| Olive Oil | 1 tbsp | Vitamin E (13% DV), Vitamin K (9% DV), Monounsaturated fats | Salads, Cooking |
 
 ## Sample Combinations
 
-Provide 3-4 example meal combinations:
-- **Combination 1**: [Protein] + [Grain] + [Vegetable] + [Fat] = Balanced meal description
-- **Combination 2**: ...
-- **Combination 3**: ...
+Provide 3-4 example meal combinations with combined micronutrient profiles:
+
+**Combination 1 - Mediterranean Bowl:**
+- Quinoa (1 cup) + Grilled Chicken (100g) + Spinach (1 cup) + Olive Oil (1 tbsp)
+- **Combined Top Nutrients**: Vitamin K (190% DV), Vitamin A (60% DV), Protein (50% DV)
+- **Meal Description**: Protein-rich, nutrient-dense bowl
+
+**Combination 2 - Asian-Inspired Stir-fry:**
+- Brown Rice (1 cup) + Tofu (100g) + Bell Peppers (1 cup) + Sesame Oil (1 tbsp)
+- **Combined Top Nutrients**: Vitamin C (170% DV), Manganese (90% DV), Iron (35% DV)
+- **Meal Description**: Antioxidant-rich, energizing meal
+
+Continue for all combinations...
 
 ## Flexibility Tips
 
@@ -280,10 +335,11 @@ Tips for creating variety:
 
 Guidelines:
 - Group by food category
-- Show nutrient highlights for each item
+- **ALWAYS show TOP 3 micronutrients with % DV** for each item
 - Suggest complementary pairings
 - Enable meal creativity
 - Respect dietary restrictions
+- Show combined nutrient profiles for sample meals
 
 Tone: Flexible, empowering, creative.
 `;

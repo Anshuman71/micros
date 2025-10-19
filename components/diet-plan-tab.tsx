@@ -90,8 +90,11 @@ export function DietPlanTab({
           body: JSON.stringify({ chatId, messages: messagesToSave }),
         });
 
-        // After first response, show suggestions
-        if (isGeneratingInitial) {
+        // After first assistant response, show suggestions and disable initial loading state
+        const hasAssistantMessage = allMessages.some(
+          (msg) => msg.role === "assistant"
+        );
+        if (hasAssistantMessage) {
           setIsGeneratingInitial(false);
           setShowSuggestions(true);
         }
@@ -119,8 +122,26 @@ export function DietPlanTab({
               status: "ready",
             }));
             setMessages(uiMessages);
-            setHasGeneratedInitial(true);
-            setShowSuggestions(true);
+
+            // Check if there's at least one assistant message (meaning initial generation is complete)
+            const hasAssistantMessage = data.messages.some(
+              (msg: any) => msg.role === "assistant"
+            );
+            const hasUserMessage = data.messages.some(
+              (msg: any) => msg.role === "user"
+            );
+
+            if (hasAssistantMessage) {
+              // Initial generation completed successfully
+              setHasGeneratedInitial(true);
+              setIsGeneratingInitial(false);
+              setShowSuggestions(true);
+            } else if (hasUserMessage && !hasAssistantMessage) {
+              // User message exists but no assistant response - generation was interrupted
+              // Mark as generated to prevent re-triggering, but don't show loading state
+              setHasGeneratedInitial(true);
+              setIsGeneratingInitial(false);
+            }
           }
         }
       } catch (error) {
@@ -144,6 +165,17 @@ export function DietPlanTab({
       generateInitialPlan();
     }
   }, [preferences, hasGeneratedInitial, messages.length, chatId]);
+
+  // Safety mechanism: Clear initial loading state when assistant message appears
+  useEffect(() => {
+    if (
+      isGeneratingInitial &&
+      messages.some((msg) => msg.role === "assistant")
+    ) {
+      setIsGeneratingInitial(false);
+      setShowSuggestions(true);
+    }
+  }, [isGeneratingInitial, messages]);
 
   const generateInitialPlan = async () => {
     if (!preferences || !chatId) return;
