@@ -2,27 +2,62 @@ import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { saveMessages, type StoredMessage } from "@/lib/redis-messages";
-import { getSystemPrompt } from "@/lib/prompts";
+import {
+  getInitialSystemPrompt,
+  getFollowUpSystemPrompt,
+  getWeeklyMealPlanPrompt,
+  getBreakfastOptionsPrompt,
+  getMixAndMatchPrompt,
+} from "@/lib/prompts";
 import { geolocation } from "@vercel/functions";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
+
+type PromptType =
+  | "initial"
+  | "follow-up"
+  | "weekly-meal-plan"
+  | "breakfast-options"
+  | "mix-and-match";
 
 export async function POST(req: Request) {
   try {
     console.log("[v0] Diet chat request received");
 
     const body = await req.json();
-    const { messages, userPreferences } = body as {
+    const {
+      messages,
+      userPreferences,
+      chatId,
+      promptType = "follow-up",
+    } = body as {
       messages: UIMessage[];
       userPreferences: {
         dietOptions: string[];
         age: string;
         gender: string;
       };
+      chatId: string;
+      promptType?: PromptType;
     };
 
     console.log("[v0] Messages received:", messages?.length || 0);
+    console.log("[v0] Chat ID:", chatId);
+    console.log("[v0] Prompt type:", promptType);
+
+    if (!chatId) {
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "chatId is required",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // Get IP address for rate limiting
     const forwarded = req.headers.get("x-forwarded-for");
@@ -58,16 +93,39 @@ export async function POST(req: Request) {
       );
     }
 
+    // Select appropriate system prompt based on promptType
+    const userPrefs = {
+      dietOptions: userPreferences?.dietOptions || [],
+      age: userPreferences?.age || "",
+      gender: userPreferences?.gender || "",
+      requestHints: requestHints,
+    };
+
+    let systemPrompt: string;
+    switch (promptType) {
+      case "initial":
+        systemPrompt = getInitialSystemPrompt(userPrefs);
+        break;
+      case "weekly-meal-plan":
+        systemPrompt = getWeeklyMealPlanPrompt(userPrefs);
+        break;
+      case "breakfast-options":
+        systemPrompt = getBreakfastOptionsPrompt(userPrefs);
+        break;
+      case "mix-and-match":
+        systemPrompt = getMixAndMatchPrompt(userPrefs);
+        break;
+      case "follow-up":
+      default:
+        systemPrompt = getFollowUpSystemPrompt(userPrefs);
+        break;
+    }
+
     console.log("[v0] Calling streamText with", messages.length, "messages");
 
     const result = await streamText({
       model: openai("gpt-4o-mini"),
-      system: getSystemPrompt({
-        dietOptions: userPreferences?.dietOptions || [],
-        age: userPreferences?.age || "",
-        gender: userPreferences?.gender || "",
-        requestHints: requestHints,
-      }),
+      system: systemPrompt,
       messages: convertToModelMessages(messages),
       temperature: 0.7,
     });
@@ -106,8 +164,8 @@ export async function POST(req: Request) {
             timestamp: Date.now(),
           });
 
-          await saveMessages(ip, allMessages);
-          console.log("[v0] Messages saved to Redis for", ip);
+          await saveMessages(chatId, allMessages);
+          console.log("[v0] Messages saved to Redis for chat:", chatId);
         } catch (error) {
           console.error("[v0] Error saving messages:", error);
         }

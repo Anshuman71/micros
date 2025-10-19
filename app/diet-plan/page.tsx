@@ -1,23 +1,9 @@
-"use client";
+import { customAlphabet } from "nanoid";
+import { redirect } from "next/navigation";
 
-import { AppShell, usePreferences } from "@/components/app-shell";
-import { DietPlanTab } from "@/components/diet-plan-tab";
+export const dynamic = "force-dynamic";
 
-function DietPlanPageContent() {
-  const { preferences, openPreferences } = usePreferences();
-
-  return (
-    <DietPlanTab
-      preferences={preferences}
-      onOpenPreferences={openPreferences}
-    />
-  );
-}
-
-export default function DietPlan() {
-  return (
-    <AppShell>
-      <DietPlanPageContent />
-    </AppShell>
-  );
+export default function DietPlanPage() {
+  const chatId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 10)();
+  return redirect(`/diet-plan/${chatId}`);
 }

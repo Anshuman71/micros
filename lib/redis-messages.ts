@@ -10,14 +10,14 @@ export interface StoredMessage {
 }
 
 /**
- * Save messages for a user (identified by IP or session)
+ * Save messages for a chat (identified by chatId)
  * Messages expire after 1 year
  */
 export async function saveMessages(
-  identifier: string,
+  chatId: string,
   messages: StoredMessage[]
 ): Promise<void> {
-  const key = `diet-messages:${identifier}`;
+  const key = `diet-messages:${chatId}`;
   const expirationInSeconds = 365 * 24 * 60 * 60; // 1 year
 
   await redis.set(key, JSON.stringify(messages), {
@@ -26,12 +26,10 @@ export async function saveMessages(
 }
 
 /**
- * Load messages for a user
+ * Load messages for a chat
  */
-export async function loadMessages(
-  identifier: string
-): Promise<StoredMessage[]> {
-  const key = `diet-messages:${identifier}`;
+export async function loadMessages(chatId: string): Promise<StoredMessage[]> {
+  const key = `diet-messages:${chatId}`;
   const data = await redis.get<StoredMessage[]>(key);
 
   if (!data) {
@@ -47,9 +45,9 @@ export async function loadMessages(
 }
 
 /**
- * Clear messages for a user
+ * Clear messages for a chat
  */
-export async function clearMessages(identifier: string): Promise<void> {
-  const key = `diet-messages:${identifier}`;
+export async function clearMessages(chatId: string): Promise<void> {
+  const key = `diet-messages:${chatId}`;
   await redis.del(key);
 }

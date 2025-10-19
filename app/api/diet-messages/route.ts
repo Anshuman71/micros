@@ -8,13 +8,25 @@ import {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages } = body as { messages: StoredMessage[] };
+    const { chatId, messages } = body as {
+      chatId: string;
+      messages: StoredMessage[];
+    };
 
-    // Get IP address for identifying the user
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+    if (!chatId) {
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "chatId is required",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
-    await saveMessages(ip, messages);
+    await saveMessages(chatId, messages);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -37,11 +49,23 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    // Get IP address for identifying the user
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+    const url = new URL(req.url);
+    const chatId = url.searchParams.get("chatId");
 
-    const messages = await loadMessages(ip);
+    if (!chatId) {
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "chatId query parameter is required",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const messages = await loadMessages(chatId);
 
     return new Response(JSON.stringify({ messages }), {
       status: 200,
@@ -64,11 +88,23 @@ export async function GET(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    // Get IP address for identifying the user
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+    const url = new URL(req.url);
+    const chatId = url.searchParams.get("chatId");
 
-    await clearMessages(ip);
+    if (!chatId) {
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "chatId query parameter is required",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    await clearMessages(chatId);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

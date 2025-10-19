@@ -3,23 +3,47 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { customAlphabet, nanoid } from "nanoid";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Response } from "@/components/ai-elements/response";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import type { DietPreferences } from "./preferences-modal";
 
 interface DietPlanTabProps {
   preferences: DietPreferences | null;
   onOpenPreferences: () => void;
+  chatId: string;
+}
+
+type PromptType =
+  | "initial"
+  | "follow-up"
+  | "weekly-meal-plan"
+  | "breakfast-options"
+  | "mix-and-match";
+
+// Generate a random chat ID
+function generateChatId(): string {
+  return customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 10)();
 }
 
 export function DietPlanTab({
+  chatId,
   preferences,
   onOpenPreferences,
 }: DietPlanTabProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [isGeneratingInitial, setIsGeneratingInitial] = useState(false);
   const [hasGeneratedInitial, setHasGeneratedInitial] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [currentPromptType, setCurrentPromptType] =
+    useState<PromptType>("initial");
   const [rateLimitInfo, setRateLimitInfo] = useState<{
     remaining: number;
     resetAt?: string;
@@ -28,20 +52,24 @@ export function DietPlanTab({
 
   // Use the AI SDK's useChat hook for automatic stream handling
   const { messages, sendMessage, status, error, setMessages, stop } = useChat({
-    transport: new DefaultChatTransport({
+    transport: new DefaultChatTransport<UIMessage>({
       api: "/api/diet-chat",
-      body: preferences
-        ? {
-            userPreferences: {
+      body: {
+        userPreferences: preferences
+          ? {
               dietOptions: preferences.dietOptions,
               age: preferences.ageGroup,
               gender: preferences.gender,
-            },
-          }
-        : undefined,
+            }
+          : undefined,
+        chatId: chatId,
+        promptType: currentPromptType,
+      },
     }),
     onFinish: async ({ message, messages: allMessages }) => {
       // Save messages to Redis after each interaction
+      if (!chatId) return;
+
       try {
         const messagesToSave = allMessages.map((msg) => ({
           id: msg.id,
@@ -56,12 +84,17 @@ export function DietPlanTab({
           timestamp: Date.now(),
         }));
 
-        // We'll save via a separate endpoint to avoid conflicts
         await fetch("/api/diet-messages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: messagesToSave }),
+          body: JSON.stringify({ chatId, messages: messagesToSave }),
         });
+
+        // After first response, show suggestions
+        if (isGeneratingInitial) {
+          setIsGeneratingInitial(false);
+          setShowSuggestions(true);
+        }
       } catch (error) {
         console.error("Error saving messages:", error);
       }
@@ -71,8 +104,10 @@ export function DietPlanTab({
   // Load persisted messages on mount
   useEffect(() => {
     const loadPersistedMessages = async () => {
+      if (!chatId) return;
+
       try {
-        const response = await fetch("/api/diet-messages");
+        const response = await fetch(`/api/diet-messages?chatId=${chatId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.messages && data.messages.length > 0) {
@@ -85,6 +120,7 @@ export function DietPlanTab({
             }));
             setMessages(uiMessages);
             setHasGeneratedInitial(true);
+            setShowSuggestions(true);
           }
         }
       } catch (error) {
@@ -92,20 +128,29 @@ export function DietPlanTab({
       }
     };
 
-    loadPersistedMessages();
-  }, [setMessages]);
+    if (chatId) {
+      loadPersistedMessages();
+    }
+  }, [chatId, setMessages]);
 
   // Generate initial diet plan when preferences are available
   useEffect(() => {
-    if (preferences && !hasGeneratedInitial && messages.length === 0) {
+    if (
+      preferences &&
+      !hasGeneratedInitial &&
+      messages.length === 0 &&
+      chatId
+    ) {
       generateInitialPlan();
     }
-  }, [preferences, hasGeneratedInitial, messages.length]);
+  }, [preferences, hasGeneratedInitial, messages.length, chatId]);
 
   const generateInitialPlan = async () => {
-    if (!preferences) return;
+    if (!preferences || !chatId) return;
 
     setHasGeneratedInitial(true);
+    setIsGeneratingInitial(true);
+    setCurrentPromptType("initial");
 
     const initialPrompt = `Create a personalized diet plan for me based on my preferences: Diet includes ${preferences.dietOptions.join(
       ", "
@@ -117,14 +162,20 @@ export function DietPlanTab({
   };
 
   const handleClearChat = async () => {
+    if (!chatId) return;
+
     try {
-      const response = await fetch("/api/diet-messages", {
+      const response = await fetch(`/api/diet-messages?chatId=${chatId}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         setMessages([]);
         setHasGeneratedInitial(false);
+        setShowSuggestions(false);
+        setIsGeneratingInitial(false);
+
+        router.replace(`/diet-plan/${chatId}`);
       }
     } catch (error) {
       console.error("Error clearing chat:", error);
@@ -133,14 +184,41 @@ export function DietPlanTab({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || status === "streaming") return;
+    if (
+      !input.trim() ||
+      status === "streaming" ||
+      isGeneratingInitial ||
+      !chatId
+    )
+      return;
 
+    setCurrentPromptType("follow-up");
     sendMessage({ text: input });
     setInput("");
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    if (status === "streaming" || isGeneratingInitial || !chatId) return;
+
+    // Determine prompt type based on suggestion
+    let promptType: PromptType = "follow-up";
+    if (suggestion.includes("weekly meal plan")) {
+      promptType = "weekly-meal-plan";
+    } else if (suggestion.includes("breakfast")) {
+      promptType = "breakfast-options";
+    } else if (suggestion.includes("mix and match")) {
+      promptType = "mix-and-match";
+    }
+
+    setCurrentPromptType(promptType);
+    sendMessage({ text: suggestion });
+
+    // Hide suggestions after first click
+    setShowSuggestions(false);
   };
 
   // Show preferences prompt if no preferences set
@@ -183,7 +261,8 @@ export function DietPlanTab({
     );
   }
 
-  const isLoading = status === "streaming" || status === "submitted";
+  const isLoading = status === "streaming" || isGeneratingInitial;
+  const isInputDisabled = isGeneratingInitial || status === "streaming";
 
   // Show chat interface with diet plan
   return (
@@ -260,7 +339,7 @@ export function DietPlanTab({
         {/* Chat messages */}
         <ScrollArea className="h-[60vh] px-6 py-4">
           <div className="space-y-4">
-            {messages.length === 0 && !isLoading && (
+            {messages.length === 0 && isGeneratingInitial && (
               <div className="text-center text-muted-foreground py-8">
                 <p className="text-sm">
                   Generating your personalized diet plan...
@@ -268,53 +347,67 @@ export function DietPlanTab({
               </div>
             )}
 
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {messages.map((message) => {
+              // Extract text content from message parts
+              const textContent = message.parts
+                .map((part) => {
+                  if ("text" in part) return part.text;
+                  if ("toolResult" in part)
+                    return JSON.stringify(part.toolResult);
+                  return "";
+                })
+                .join("");
+
+              return (
                 <div
-                  className={`rounded-lg px-4 py-3 ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground max-w-[85%]"
-                      : "bg-muted text-foreground w-full"
+                  key={message.id}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.role === "user" ? (
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                      {message.parts
-                        .map((part) => {
-                          if (part.type === "text") return part.text;
-                          return "";
-                        })
-                        .join("")}
-                    </p>
-                  ) : (
-                    <div className="prose prose-sm max-w-none dark:prose-invert prose-table:text-sm prose-headings:text-foreground prose-th:text-left">
-                      <Response parseIncompleteMarkdown={true}>
+                  <div
+                    className={`rounded-lg px-4 py-3 ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground max-w-[85%]"
+                        : "bg-muted text-foreground w-full"
+                    }`}
+                  >
+                    {message.role === "user" ? (
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
                         {message.parts
                           .map((part) => {
                             if (part.type === "text") return part.text;
-                            if (part.type.startsWith("tool-"))
-                              return JSON.stringify(part);
                             return "";
                           })
                           .join("")}
-                      </Response>
-                    </div>
-                  )}
+                      </p>
+                    ) : (
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-table:text-sm prose-headings:text-foreground prose-th:text-left">
+                        <Response parseIncompleteMarkdown={true}>
+                          {message.parts
+                            .map((part) => {
+                              if (part.type === "text") return part.text;
+                              if (part.type.startsWith("tool-"))
+                                return JSON.stringify(part);
+                              return "";
+                            })
+                            .join("")}
+                        </Response>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {isLoading && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-lg px-4 py-3 flex items-center gap-2">
                   <Spinner className="w-4 h-4" />
                   <span className="text-sm text-muted-foreground">
-                    Generating response...
+                    {isGeneratingInitial
+                      ? "Creating your diet plan..."
+                      : "Generating response..."}
                   </span>
                 </div>
               </div>
@@ -326,6 +419,29 @@ export function DietPlanTab({
                 <p className="text-xs text-destructive/80 mt-1">
                   {error.message}
                 </p>
+              </div>
+            )}
+
+            {/* Suggestions */}
+            {showSuggestions && !isLoading && messages.length > 0 && (
+              <div className="pt-4">
+                <p className="text-sm text-foreground/60 mb-3">
+                  Try these suggestions:
+                </p>
+                <Suggestions>
+                  <Suggestion
+                    suggestion="Create a weekly meal plan"
+                    onClick={handleSuggestionClick}
+                  />
+                  <Suggestion
+                    suggestion="Suggest breakfast options"
+                    onClick={handleSuggestionClick}
+                  />
+                  <Suggestion
+                    suggestion="Mix and match options for variety"
+                    onClick={handleSuggestionClick}
+                  />
+                </Suggestions>
               </div>
             )}
           </div>
@@ -342,13 +458,17 @@ export function DietPlanTab({
               type="text"
               value={input}
               onChange={handleInputChange}
-              placeholder="Ask to modify your diet plan, get recipe ideas, or nutrition advice..."
-              disabled={isLoading}
-              className="flex-1 px-4 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              placeholder={
+                isInputDisabled
+                  ? "Generating your diet plan..."
+                  : "Ask to modify your diet plan, get recipe ideas, or nutrition advice..."
+              }
+              disabled={isInputDisabled}
+              className="flex-1 px-4 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               type="submit"
-              disabled={isLoading || !input.trim()}
+              disabled={isInputDisabled || !input.trim()}
               className="px-6 py-2 bg-primary text-primary-foreground rounded-md font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Send
