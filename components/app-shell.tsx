@@ -37,8 +37,8 @@ export function AppShell({ children }: AppShellProps) {
   // Determine active tab from pathname
   const getActiveTab = () => {
     if (pathname === "/minerals") return "minerals";
-    if (pathname === "/diet-plan") return "diet-plan";
-    return "vitamins";
+    if (pathname === "/vitamins") return "vitamins";
+    return "diet-plan";
   };
 
   const activeTab = getActiveTab();

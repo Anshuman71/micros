@@ -49,6 +49,7 @@ export function DietPlanTab({
     resetAt?: string;
   } | null>(null);
   const [input, setInput] = useState("");
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
   // Use the AI SDK's useChat hook for automatic stream handling
   const { messages, sendMessage, status, error, setMessages, stop } = useChat({
@@ -146,6 +147,9 @@ export function DietPlanTab({
         }
       } catch (error) {
         console.error("Error loading persisted messages:", error);
+      } finally {
+        // Mark history as loaded regardless of outcome
+        setIsHistoryLoaded(true);
       }
     };
 
@@ -158,13 +162,20 @@ export function DietPlanTab({
   useEffect(() => {
     if (
       preferences &&
+      isHistoryLoaded && // wait for history check to complete
       !hasGeneratedInitial &&
       messages.length === 0 &&
       chatId
     ) {
       generateInitialPlan();
     }
-  }, [preferences, hasGeneratedInitial, messages.length, chatId]);
+  }, [
+    preferences,
+    isHistoryLoaded,
+    hasGeneratedInitial,
+    messages.length,
+    chatId,
+  ]);
 
   // Safety mechanism: Clear initial loading state when assistant message appears
   useEffect(() => {
@@ -206,6 +217,7 @@ export function DietPlanTab({
         setHasGeneratedInitial(false);
         setShowSuggestions(false);
         setIsGeneratingInitial(false);
+        setIsHistoryLoaded(true); // optional, keeps gating consistent
 
         router.replace(`/diet-plan/${chatId}`);
       }

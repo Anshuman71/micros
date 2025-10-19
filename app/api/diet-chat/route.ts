@@ -1,7 +1,11 @@
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { saveMessages, type StoredMessage } from "@/lib/redis-messages";
+import {
+  saveMessages,
+  loadMessages,
+  type StoredMessage,
+} from "@/lib/redis-messages";
 import {
   getInitialSystemPrompt,
   getFollowUpSystemPrompt,
@@ -91,6 +95,33 @@ export async function POST(req: Request) {
           },
         }
       );
+    }
+
+    // Check if this is an initial request and if initial response already exists
+    if (promptType === "initial") {
+      try {
+        const existingMessages = await loadMessages(chatId);
+        const hasAssistantMessage = existingMessages.some(
+          (msg) => msg.role === "assistant"
+        );
+
+        if (hasAssistantMessage) {
+          console.log("[v0] Initial response already exists for chat:", chatId);
+          return new Response(
+            JSON.stringify({
+              error: "Initial response already generated",
+              message: "This chat already has an initial diet plan response.",
+            }),
+            {
+              status: 409,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+      } catch (error) {
+        console.error("[v0] Error checking existing messages:", error);
+        // Continue with generation if check fails
+      }
     }
 
     // Select appropriate system prompt based on promptType
