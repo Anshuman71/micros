@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import { IBM_Plex_Mono } from "next/font/google";
+import { AppShell } from "@/components/app-shell";
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -22,7 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${ibmPlexMono.className} antialiased`}>{children}</body>
+      <body className={`${ibmPlexMono.className} antialiased`}>
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

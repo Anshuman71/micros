@@ -37,7 +37,6 @@ export function DietPlanTab({
   onOpenPreferences,
 }: DietPlanTabProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [isGeneratingInitial, setIsGeneratingInitial] = useState(false);
   const [hasGeneratedInitial, setHasGeneratedInitial] = useState(false);

@@ -37,8 +37,8 @@ export function AppShell({ children }: AppShellProps) {
   // Determine active tab from pathname
   const getActiveTab = () => {
     if (pathname === "/minerals") return "minerals";
-    if (pathname === "/vitamins") return "vitamins";
-    return "diet-plan";
+    if (pathname.startsWith("/diet-plan")) return "diet-plan";
+    return "vitamins";
   };
 
   const activeTab = getActiveTab();
@@ -146,7 +146,9 @@ export function AppShell({ children }: AppShellProps) {
         </header>
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-6 py-9">{children}</div>
+        <div className="max-w-7xl mx-auto px-6 py-9 min-h-screen">
+          {children}
+        </div>
 
         {/* Footer */}
         <footer className="border-t border-border bg-card mt-16">

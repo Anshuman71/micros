@@ -70,9 +70,5 @@ function VitaminsPage() {
 }
 
 export default function Home() {
-  return (
-    <AppShell>
-      <VitaminsPage />
-    </AppShell>
-  );
+  return <VitaminsPage />;
 }

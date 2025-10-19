@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { CategorySection } from "@/components/category-section";
-import { AppShell } from "@/components/app-shell";
 
 interface Nutrient {
   name: string;
@@ -15,7 +14,7 @@ interface Nutrient {
   absorption_tips: string;
 }
 
-function MineralsPage() {
+export default function Minerals() {
   const [nutrients, setNutrients] = useState<Nutrient[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,13 +61,5 @@ function MineralsPage() {
       description="Inorganic elements crucial for bone health, muscle function, nerve transmission, and maintaining proper fluid balance."
       nutrients={minerals}
     />
-  );
-}
-
-export default function Minerals() {
-  return (
-    <AppShell>
-      <MineralsPage />
-    </AppShell>
   );
 }
