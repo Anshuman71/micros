@@ -31,7 +31,7 @@ export function Tabs({ tabs, activeTab, rightContent }: TabsProps) {
             href={tab.href}
             className={`px-6 py-4 font-medium text-sm transition-all relative ${
               activeTab === tab.id
-                ? `text-[${accentMap[tab.id]}]`
+                ? `text-[${accentMap[tab.id as keyof typeof accentMap]}]`
                 : "text-foreground/60 hover:text-foreground/80"
             }`}
           >
